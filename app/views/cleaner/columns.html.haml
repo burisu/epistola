@@ -8,13 +8,13 @@
 
 -if @messages
   .errors
-    %p Des problèmes ont été rencontrés&nbsp;:
+    %h2.error="#{@messages.size} problèmes ont été rencontrés&nbsp;:".html_safe
     %ul
       -for message in @messages
         %li
           %p=message
 
-=form_tag({:force=>!@messages.nil?}) do
+=form_tag() do
   %fieldset
     %legend Colonnes
     %table.formic
@@ -29,14 +29,16 @@
     %table.formic
       %tr
         %td.label Préfixe N°Abonné
-        %td.input=text_field_tag("subscriber_prefix")
+        %td.input=text_field_tag("subscriber_prefix", params["subscriber_prefix"])
+      %tr
+        %td.label Nombre de caractère maximum par ligne
+        %td.input=text_field_tag("line_size", params["line_size"], :size=>4, :maxlength=>4)
       %tr
         %td.label Nom du fichier à exporter
         %td.input=text_field_tag("export_file", params["export_file"])
       
   .actions
     -if @messages
-      =submit_tag("Exporter quand même!")
-    -else
-      =submit_tag("Exporter")
+      =submit_tag("Exporter malgré les problèmes", :name=>"force_export")
+    =submit_tag("Vérifier et exporter", :name=>"export")
     =link_to("Retour à l'étape 1", :action=>:upload)

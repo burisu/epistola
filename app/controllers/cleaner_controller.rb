@@ -198,9 +198,10 @@ class CleanerController < ApplicationController
     @file = find_file
     @headers = @file.readline
     params[:export_file] ||= "AA.ASC"
+    params[:line_size] ||= 32
     if request.post?
-      @messages = generate_data(false) unless params[:force] == "true"
-      if params[:force] == "true" or @messages.size.zero?
+      @messages = generate_data(false) unless params[:force_export]
+      if params[:force_export] or @messages.size.zero?
         data = generate_data(true)
         send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
       end
@@ -240,19 +241,27 @@ class CleanerController < ApplicationController
     line << ' << "\n"'
     
     unless generate_else_test
+      line_size = params[:line_size].to_i
+      line_size = 38 if line_size.zero?
       line << "\n"
       for l in [:line_2, :line_3, :line_4, :line_5]
         if headers.include?(l)
           col = export_column(l)
-          line << "if (x = #{col[:normalize][headers, params]}).size > 38\n"
-          line << "  messages << \"Ligne \#{line[:__LINE__]} : ERREUR : La colonne #{col[:label]} est trop longue (\#{x.strip}).\"\n"
+          line << "if (x = (#{col[:normalize][headers, params]}).strip).size > #{line_size}\n"
+          line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
           line << "end\n"
         end
       end
       col1 = export_column(:title)
       col2 = export_column(:last_name_and_first_name)
-      line << "if (x = #{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip.size > 38\n"
-      line << "  messages << \"Ligne \#{line[:__LINE__]} : ERREUR : La colonne 'Titre Nom Prénom' est trop longue (\#{x.strip}).\"\n"
+      line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
+      line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+      line << "end\n"
+
+      col1 = export_column(:post_code)
+      col2 = export_column(:city)
+      line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
+      line << "  messages << \"L\#{line[:__LINE__]} : <em>'#{col1[:label]} #{col2[:label]}'</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
       line << "end\n"
     end
 
