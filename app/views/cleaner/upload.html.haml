@@ -1,0 +1,15 @@
+%h1 Étape&nbsp;1&nbsp;: Importer le fichier au format CSV
+%p
+  Il faut sélectionner le fichier d'adresses au format CSV (Encodage UTF-8 et des virgules en guise de séparateur). La première ligne est considérée comme une ligne d'en-têtes.
+%p
+  Les colonnes utilisables sont&nbsp;:
+  =@columns.collect{|x| content_tag(:strong, x)}.to_sentence.html_safe
+=form_tag({:action=>:upload}, :multipart=>true) do
+  %fieldset
+    %legend Import
+    %table.formic
+      %tr
+        %td.label Fichier
+        %td.input=file_field_tag(:listing)
+  .actions
+    =submit_tag("Envoyer")

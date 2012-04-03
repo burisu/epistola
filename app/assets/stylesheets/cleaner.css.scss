@@ -1,3 +1,16 @@
 // Place all the styles related to the cleaner controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+* { font-family: "Open Sans", helvetica, sans-serif; font-size: 16px;}
+h1 { font-size: 2em; }
+body { background: #F1F2F3 }
+#main { background: #FFF; width: 50%; margin: 2em auto; padding: 2em; box-shadow: 0 0 1em rgba(0,0,0,0.4)}
+
+fieldset { border: 1px solid #777 }
+.actions { text-align: center;padding: 1em; }
+
+table.formic td.label { text-align: right; font-weight: normal; width: 33%; padding: 0 1ex;}
+table.formic td.example { color: #777; padding: 0 1ex; }
+
+.errors li p { color: #900; margin: 0;}
