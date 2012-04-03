@@ -182,6 +182,14 @@ class CleanerController < ApplicationController
       FileUtils.mkdir_p(files_dir)
       file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)
       File.open(files_dir.join(file_id), "wb") {|f| f.write(data.read) }
+
+      begin
+        file = find_file(file_id)
+        file.readline
+      rescue Exception => e
+        flash[:error] = "Le fichier CSV est mal formaté (#{e.class.name}: #{e.message})"
+        return
+      end
       redirect_to :action=>:columns, :file_id=>file_id
     end
   end
@@ -285,8 +293,8 @@ class CleanerController < ApplicationController
     return EXPORT.select{|h| h[:name] == name}[0]
   end
 
-  def find_file
-    file_id = params[:file_id]
+  def find_file(id=nil)
+    file_id = id || params[:file_id]
     file = Rails.root.join('tmp', 'cleaner', file_id)
     unless File.exist?(file)
       raise Exception.new("No file #{file.to_s}")

@@ -4,6 +4,9 @@
 %p
   Les colonnes utilisables sont&nbsp;:
   =@columns.collect{|x| content_tag(:strong, x)}.to_sentence.html_safe
+-unless flash[:error].blank?
+  .error=flash[:error].to_s
+
 =form_tag({:action=>:upload}, :multipart=>true) do
   %fieldset
     %legend Import
