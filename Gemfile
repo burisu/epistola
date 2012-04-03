@@ -7,6 +7,7 @@ gem 'rails', '3.2.3'
 
 gem 'sqlite3'
 
+gem 'exception_notification'
 gem 'rails-i18n'
 gem 'haml'
 gem 'fastercsv'
