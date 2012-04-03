@@ -49,9 +49,9 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:quantity, :subscription_id)
-                  code << "line[:subscription_id].to_s.rjust(5, '0')+qindex.to_s(36).rjust(1, '0')"
+                  code << "line[:subscription_id].to_s.rjust(5, '0')+qindex.to_s(36).upcase.rjust(1, '0')"
                 elsif headers.contains?(:subscriber_id)
-                  code << "line[:subscriber_id].to_s.rjust(5, '0')+number_by_subscriber[line[:subscriber_id]].to_s(36).rjust(1, '0')"
+                  code << "line[:subscriber_id].to_s.rjust(5, '0')+number_by_subscriber[line[:subscriber_id]].to_s(36).upcase.rjust(1, '0')"
                 else
                   code << "number.rjust(6, '0')"
                 end
