@@ -21,7 +21,7 @@
       -@headers.each_with_index do |header, index|
         %tr.column
           %td.label=header
-          %td.input=select_tag("headers[#{index}]", options_for_select(@columns, @reversed_columns[header.to_s.codeize]))
+          %td.input=select_tag("headers[#{index}]", options_for_select(@columns, (params[:headers].is_a?(Hash) ? params[:headers][index.to_s] : nil)||@reversed_columns[header.to_s.codeize]))
           %td.example=@first_line[index]
 
   %fieldset

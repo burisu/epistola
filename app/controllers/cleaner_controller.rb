@@ -230,6 +230,21 @@ class CleanerController < ApplicationController
     excep, messages = [], []
     data.force_encoding('US-ASCII')
     code, line = "", ""
+
+
+    if headers.uniq.size != headers.size
+      doubles = []
+      headers.each_with_index{|x,i| doubles << x if x == headers[i+1]}
+      doubles = doubles.uniq.sort.collect{|h| '<em>'+COLUMNS[h][0]+'</em>'}
+      messages << "ATTENTION : Des colonnes sont définies plusieurs fois (#{doubles.to_sentence})".html_safe
+    end
+
+    col1 = export_column(:last_name_and_first_name)
+    if headers.contains?(:last_name_and_first_name, :last_name)
+      messages << "ATTENTION : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{col1[:label]}</em> est déjà défini".html_safe
+    elsif headers.contains?(:last_name_and_first_name, :first_name)
+      messages << "ATTENTION : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{col1[:label]}</em> est déjà défini".html_safe
+    end
     
     line = "data"
     EXPORT.each_with_index do |column, index|
@@ -261,7 +276,7 @@ class CleanerController < ApplicationController
       col1 = export_column(:post_code)
       col2 = export_column(:city)
       line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
-      line << "  messages << \"L\#{line[:__LINE__]} : <em>'#{col1[:label]} #{col2[:label]}'</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+      line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
       line << "end\n"
     end
 
