@@ -53,7 +53,7 @@ class CleanerController < ApplicationController
                 elsif headers.contains?(:subscriber_id)
                   code << "line[:subscriber_id].to_s.rjust(6, '0')+number_by_subscriber[line[:subscriber_id]].to_s.upcase.rjust(3, '0')"
                 else
-                  code << "number.rjust(6, '0')"
+                  code << "number.to_s.rjust(6, '0')"
                 end
                 code = params[:subscriber_prefix].to_s.inspect+"+"+code if params[:subscriber_prefix]
                 code
