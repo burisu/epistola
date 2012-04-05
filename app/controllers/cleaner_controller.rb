@@ -147,10 +147,10 @@ class CleanerController < ApplicationController
               :quote => true,
               :normalize => Proc.new do |headers, params|
                 code = ""
-                if headers.contains?(:post_code)
-                  code << "line[:post_code].to_s.strip.upper_ascii"
-                elsif headers.contains?(:post_code_and_city)
+                if headers.contains?(:post_code_and_city)
                   code << "line[:post_code_and_city].to_s.split(' ')[0].upper_ascii"
+                elsif headers.contains?(:post_code)
+                  code << "line[:post_code].to_s.strip.upper_ascii"
                 else
                   code << "''"
                 end
@@ -162,10 +162,10 @@ class CleanerController < ApplicationController
               :quote => true,
               :normalize => Proc.new do |headers, params|
                 code = ""
-                if headers.contains?(:city)
-                  code << "line[:city].to_s.strip.upper_ascii"
-                elsif headers.contains?(:post_code_and_city)
+                if headers.contains?(:post_code_and_city)
                   code << "line[:post_code_and_city].to_s.split(' ')[1..-1].join(' ').upper_ascii"
+                elsif headers.contains?(:city)
+                  code << "line[:city].to_s.strip.upper_ascii"
                 else
                   code << "''"
                 end
@@ -232,19 +232,50 @@ class CleanerController < ApplicationController
     code, line = "", ""
 
 
-    if headers.uniq.size != headers.size
-      doubles = []
-      headers.each_with_index{|x,i| doubles << x if x == headers[i+1]}
-      doubles = doubles.uniq.sort.collect{|h| '<em>'+COLUMNS[h][0]+'</em>'}
+    doubles = []
+    sheaders = headers.compact.sort # {|a,b| a.to_s <=> b.to_s}
+    sheaders.each_with_index{|x,i| doubles << x if x == sheaders[i+1]}
+    unless doubles.empty?
+      doubles = doubles.uniq.collect{|h| '<em>'+COLUMNS[h][0]+'</em>'}
       messages << "ATTENTION : Des colonnes sont définies plusieurs fois (#{doubles.to_sentence})".html_safe
     end
+    
+    missing_columns = []
 
-    col1 = export_column(:last_name_and_first_name)
-    if headers.contains?(:last_name_and_first_name, :last_name)
-      messages << "ATTENTION : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{col1[:label]}</em> est déjà défini".html_safe
-    elsif headers.contains?(:last_name_and_first_name, :first_name)
-      messages << "ATTENTION : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{col1[:label]}</em> est déjà défini".html_safe
+    # Last name & First name
+    if headers.include?(:last_name_and_first_name)
+      multicol = COLUMNS[:last_name_and_first_name][0]
+      if headers.include?(:last_name)
+        messages << "ATTENTION : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+      end
+      if headers.contains?(:first_name)
+        messages << "ATTENTION : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+      end
+    elsif !headers.contains?(:last_name, :first_name)
+      missing_columns << :last_name unless headers.include?(:last_name)
+      missing_columns << :first_name unless headers.include?(:first_name)
     end
+
+    # Post code & City
+    if headers.include?(:post_code_and_city)
+      multicol = COLUMNS[:post_code_and_city][0]
+      if headers.include?(:post_code)
+        messages << "ATTENTION : La colonne <em>#{COLUMNS[:post_code][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+      end
+      if headers.contains?(:city)
+        messages << "ATTENTION : La colonne <em>#{COLUMNS[:city][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+      end
+    elsif !headers.contains?(:post_code, :city)
+      missing_columns << :post_code unless headers.include?(:post_code)
+      missing_columns << :city unless headers.include?(:city)
+    end
+
+    # Missing columns
+    if missing_columns.size > 0
+      messages << ("ATTENTION : Des colonnes ne sont pas définies : "+missing_columns.collect{|c| '<em>'+COLUMNS[c][0]+'</em>'}.to_sentence).html_safe
+    end
+    
+    return messages unless generate_else_test or messages.empty?
     
     line = "data"
     EXPORT.each_with_index do |column, index|
@@ -304,7 +335,7 @@ class CleanerController < ApplicationController
     end
     code << line.strip.gsub(/^/, '  ')+"\n"
     code << "end\n"
-    code.split(/\n/).each_with_index{|l,i| puts((i+1).to_s.rjust(4)+": "+l)}
+    # code.split(/\n/).each_with_index{|l,i| puts((i+1).to_s.rjust(4)+": "+l)}
     eval(code)
     if generate_else_test
       return data
