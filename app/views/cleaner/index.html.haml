@@ -2,17 +2,16 @@
 %p=link_to("Importer", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top")+", vérifier, fusionner et exporter vos fichiers d'adresses.".html_safe
 
 
--#=form_tag({:action => :export}, :multipart=>true) do
-.all
-  #files
+#files
 
-  -#%fieldset
-    %legend Vérification
-    %table.formic
-      %tr
-        %td.label Nombre de caractère maximum par ligne
-        %td.input=text_field_tag("line_size", params["line_size"], :size=>4, :maxlength=>4)
+-#%fieldset
+  %legend Vérification
+  %table.formic
+    %tr
+      %td.label Nombre de caractère maximum par ligne
+      %td.input=text_field_tag("line_size", params["line_size"], :size=>4, :maxlength=>4)
 
+=form_tag({}, "data-collect"=>"form.exportable") do
   %fieldset
     %legend Export
     %table.formic

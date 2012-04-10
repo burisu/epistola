@@ -20,61 +20,45 @@ $("*[data-update]").live("ajax:success", function (event, data, status, xhr) {
 });
 
 $("a[data-remove]").live("click", function () {
-    $($(this).data("remove")).remove();
+    $($(this).data("remove")).fadeOut();
     return false;
 });
 
+$("form[data-remote][data-disable]").live("ajax:before", function (event) {
+    var element = $(this), target, overlay = $("<div></div>"), offset;
+    target = $('#' + element.data("disable"));
+    offset = target.offset();
+    // target.attr("disabled", "true");
+    overlay.addClass("fs-overlay").css("display", "none");
+    overlay.css({'position': 'absolute', 'width': target.innerWidth()+'px', 'height': target.innerHeight()+'px', 'top':offset.top+'px', 'left':offset.left+'px'});
+    target.disablingOverlay = overlay;
+    target.append(overlay);
+    overlay.fadeIn();
+});
 
-$.uploadFile = function(form, action_url, div_id) {
-    // Create the iframe...
-    var iframe = document.createElement("iframe");
-    iframe.setAttribute("id", "upload_iframe");
-    iframe.setAttribute("name", "upload_iframe");
-    iframe.setAttribute("width", "0");
-    iframe.setAttribute("height", "0");
-    iframe.setAttribute("border", "0");
-    iframe.setAttribute("style", "width: 0; height: 0; border: none;");
- 
-    // Add to document...
-    form.parentNode.appendChild(iframe);
-    window.frames['upload_iframe'].name = "upload_iframe";
- 
-    iframeId = document.getElementById("upload_iframe");
- 
-    // Add event...
-    var eventHandler = function () {
-	
-        if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
-        else iframeId.removeEventListener("load", eventHandler, false);
-	
-        // Message from server...
-        if (iframeId.contentDocument) {
-            content = iframeId.contentDocument.body.innerHTML;
-        } else if (iframeId.contentWindow) {
-            content = iframeId.contentWindow.document.body.innerHTML;
-        } else if (iframeId.document) {
-            content = iframeId.document.body.innerHTML;
-        }
-	
-        document.getElementById(div_id).innerHTML = content;
-	
-        // Del the iframe...
-        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
-    }
-    
-    if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
-    if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
-    
-    // Set properties of form...
-    form.setAttribute("target", "upload_iframe");
-    form.setAttribute("action", action_url);
-    form.setAttribute("method", "post");
-    form.setAttribute("enctype", "multipart/form-data");
-    form.setAttribute("encoding", "multipart/form-data");
-    
-    // Submit the form...
-    form.submit();
-    
-    document.getElementById(div_id).innerHTML = "Uploading...";
-    return true;
-}
+
+$("form[data-remote][data-disable]").live("ajax:complete", function (event) {
+    var element = $(this), target;
+    target = $('#' + element.data("disable"));
+    // target.attr("disabled", "false");
+    target.children('.fs-overlay').fadeOut();
+    target.children('.fs-overlay').remove();
+});
+
+$("form[data-collect]").submit(function () {
+    // Duplicates 
+    var form = $(this), targets, collector = $("<div></div>");
+    targets = $(form.data("collect"));
+    form.children('.data-collector').remove();
+    form.append(collector);
+    overlay.addClass("data-collector").css("display", "none");
+    targets.each(function (target) {
+	target.serializeArray().each(function (couple) {
+	    var hf = $("<input type='hidden'></input>");
+	    hf.attr(couple);
+	    alert(couple.name);
+	    collector.append(hf);
+	});
+    });
+    return false;
+});

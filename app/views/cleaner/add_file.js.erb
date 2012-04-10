@@ -1,0 +1,3 @@
+<%= remotipart_response do %>
+$('#<%=params[:fieldset]-%>').replaceWith('<%= escape_javascript(render(:partial=>'cleaner/file', :object=>@file)) %>');
+<% end %>

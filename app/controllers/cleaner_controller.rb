@@ -193,15 +193,20 @@ class CleanerController < ApplicationController
   end
 
   def add_file
-    @columns = COLUMNS.values.collect{|x| x[0]}
+    @columns_labels = COLUMNS.values.collect{|x| x[0]}
+    @columns = COLUMNS.collect{|k,v| [v[0], k]}
+    @reversed_columns = {}
+    for key, labels in COLUMNS
+      for label in labels
+        @reversed_columns[label.codeize] = key
+      end
+    end
+
     file = {}
+    upload = params[:file]
     if request.post?
-      upload = params[:file]
-      if upload[:uploaded].to_s == 'true'
-        # redirect_to "columns"
-        file = upload.symbolize_keys
-        file[:uploaded] = true
-      elsif upload[:data]
+      file[:uploaded] = true
+      if upload[:data]
         files_dir = Rails.root.join('tmp', 'cleaner')
         FileUtils.mkdir_p(files_dir)
         file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)[0..6]
@@ -219,12 +224,33 @@ class CleanerController < ApplicationController
         file[:error] = "Merci de fournir un fichier ou de supprimer la ligne"
         file[:uploaded] = false
       end
+
+      if file[:uploaded]
+        f = find_file(file[:key])
+        file[:headers] = f.readline
+        file[:first_line] = f.readline
+      end
+
+      @file = file
+      respond_to do |format|
+        format.js
+        # format.html {render :partial=>"cleaner/file", :object => file}
+      end
+      return
+    elsif request.put?
+      file = upload.symbolize_keys
+      f = find_file(file[:key])
+      file[:headers] = f.readline
+      file[:first_line] = f.readline
+      file[:messages] = generate_data(file[:key], file[:columns], false)
+    elsif request.delete?
+      
     else
+      #
       file = new_file
     end
     render :partial=>"cleaner/file", :object => file
   end
-
 
 
 
@@ -364,7 +390,7 @@ class CleanerController < ApplicationController
     sheaders.each_with_index{|x,i| doubles << x if x == sheaders[i+1]}
     unless doubles.empty?
       doubles = doubles.uniq.collect{|h| '<em>'+COLUMNS[h][0]+'</em>'}
-      messages << "ATTENTION : Des colonnes sont définies plusieurs fois (#{doubles.to_sentence})".html_safe
+      messages << "ERREUR : Des colonnes sont définies plusieurs fois (#{doubles.to_sentence})".html_safe
     end
     
     missing_columns = []
@@ -373,10 +399,10 @@ class CleanerController < ApplicationController
     if headers.include?(:last_name_and_first_name)
       multicol = COLUMNS[:last_name_and_first_name][0]
       if headers.include?(:last_name)
-        messages << "ATTENTION : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+        messages << "ERREUR : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
       if headers.contains?(:first_name)
-        messages << "ATTENTION : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+        messages << "ERREUR : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
     elsif !headers.contains?(:last_name, :first_name)
       missing_columns << :last_name unless headers.include?(:last_name)
@@ -387,10 +413,10 @@ class CleanerController < ApplicationController
     if headers.include?(:post_code_and_city)
       multicol = COLUMNS[:post_code_and_city][0]
       if headers.include?(:post_code)
-        messages << "ATTENTION : La colonne <em>#{COLUMNS[:post_code][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+        messages << "ERREUR : La colonne <em>#{COLUMNS[:post_code][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
       if headers.contains?(:city)
-        messages << "ATTENTION : La colonne <em>#{COLUMNS[:city][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+        messages << "ERREUR : La colonne <em>#{COLUMNS[:city][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
     elsif !headers.contains?(:post_code, :city)
       missing_columns << :post_code unless headers.include?(:post_code)
@@ -399,7 +425,7 @@ class CleanerController < ApplicationController
 
     # Missing columns
     if missing_columns.size > 0
-      messages << ("ATTENTION : Des colonnes ne sont pas définies : "+missing_columns.collect{|c| '<em>'+COLUMNS[c][0]+'</em>'}.to_sentence).html_safe
+      messages << ("ERREUR : Des colonnes ne sont pas définies : "+missing_columns.collect{|c| '<em>'+COLUMNS[c][0]+'</em>'}.to_sentence).html_safe
     end
     
     return messages unless generate_else_test or messages.empty?
