@@ -174,39 +174,166 @@ class CleanerController < ApplicationController
             }
            ].freeze
 
+
+
+
+
+
+  def index
+    params[:export_file] ||= "AA.ASC"
+    params[:line_size] ||= 32
+  end
+
+
+  hide_action :new_upload
+  def new_file()
+    key = @@uploads.dup
+    @@uploads.succ!
+    return {:key => key, :label => "Fichier #{key}", :uploaded => false}
+  end
+
+  def add_file
+    @columns = COLUMNS.values.collect{|x| x[0]}
+    file = {}
+    if request.post?
+      upload = params[:file]
+      if upload[:uploaded].to_s == 'true'
+        # redirect_to "columns"
+        file = upload.symbolize_keys
+        file[:uploaded] = true
+      elsif upload[:data]
+        files_dir = Rails.root.join('tmp', 'cleaner')
+        FileUtils.mkdir_p(files_dir)
+        file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)[0..6]
+        File.open(files_dir.join(file_id), "wb") {|f| f.write(upload[:data].read) }
+        file = {:label => upload[:data].original_filename.to_s, :key => file_id, :uploaded => true}
+        begin
+          f = find_file(file_id)
+          f.readline
+        rescue Exception => e
+          file[:error] = "Le fichier CSV est mal formaté (#{e.class.name}: #{e.message})"
+          file[:uploaded] = false
+        end
+      else
+        file = upload.symbolize_keys
+        file[:error] = "Merci de fournir un fichier ou de supprimer la ligne"
+        file[:uploaded] = false
+      end
+    else
+      file = new_file
+    end
+    render :partial=>"cleaner/file", :object => file
+  end
+
+
+
+
+
+
+
+  @@uploads = "A" unless defined? @@uploads
+
+
+
+
+
+
+
+
+
+
+
+
+  # Generate a new key for a new upload
+  hide_action :new_upload
+  def new_upload()
+    key = @@uploads.dup
+    @@uploads.succ!
+    return {:key => key, :label => "Fichier #{key}", :uploaded => false}
+  end
+
+  # Configure list of listings to upload
   def upload
     @columns = COLUMNS.values.collect{|x| x[0]}
+    @listings = []
     if request.post?
-      data = params[:listing]
-      files_dir = Rails.root.join('tmp', 'cleaner')
-      FileUtils.mkdir_p(files_dir)
-      file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)
-      File.open(files_dir.join(file_id), "wb") {|f| f.write(data.read) }
-
-      begin
-        file = find_file(file_id)
-        file.readline
-      rescue Exception => e
-        flash[:error] = "Le fichier CSV est mal formaté (#{e.class.name}: #{e.message})"
-        return
+      for letter, upload in params[:uploads]
+        listing = {}
+        if upload[:uploaded].to_s == 'true'
+          listing = upload.symbolize_keys
+          listing[:uploaded] = true
+        elsif upload[:data]
+          files_dir = Rails.root.join('tmp', 'cleaner')
+          FileUtils.mkdir_p(files_dir)
+          file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)[0..6]
+          File.open(files_dir.join(file_id), "wb") {|f| f.write(upload[:data].read) }
+          listing = {:label => upload[:data].original_filename.to_s, :key => file_id, :uploaded => true}
+          begin
+            file = find_file(file_id)
+            file.readline
+          rescue Exception => e
+            listing[:error] = "Le fichier CSV est mal formaté (#{e.class.name}: #{e.message})"
+            listing[:uploaded] = false
+          end
+        else
+          listing = upload.symbolize_keys
+          listing[:error] = "Merci de fournir un fichier ou de supprimer la ligne"
+          listing[:uploaded] = false          
+        end
+        @listings << listing
       end
-      redirect_to :action=>:columns, :file_id=>file_id
+      unless @listings.detect{|x| !x[:uploaded]}
+        listings = {}
+        @listings.each_with_index{|l, i| listings[i] = {:key=>l[:key], :label=>l[:label]}}
+        redirect_to :action=>:columns, :listings=>listings # .delete_if{|k,v| ![:key, :label].include?(k)}
+      end
+    else
+      @listings << new_upload
     end
   end
 
+  # Adds a new line for an upload
+  def add_upload
+    render :partial=>"cleaner/upload", :object => new_upload
+  end
+
+  # Configures columns of files
   def columns
-    @file = find_file
-    @headers = @file.readline
+    @matchings = []
+    for key, matching in params[:listings] || params[:matchings]
+      matching ||= {}
+      matching[:key] = matching[:key]
+      matching[:label] = matching[:label]
+      file = find_file(matching[:key])
+      matching[:headers] = file.readline
+      matching[:first_line] = file.readline
+      
+      if request.post?
+        matching[:messages] = generate_data(matching[:key], matching[:columns], false) unless params[:force_export]
+      end
+      
+      @matchings << matching
+    end
+    
+
+
+    # if params[:force_export] or messages.size.zero?
+    #   data = generate_data(key, true)
+    #   send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+    # end
+
+    # @file = find_file
+    # @headers = @file.readline
     params[:export_file] ||= "AA.ASC"
     params[:line_size] ||= 32
-    if request.post?
-      @messages = generate_data(false) unless params[:force_export]
-      if params[:force_export] or @messages.size.zero?
-        data = generate_data(true)
-        send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
-      end
-    end
-    @first_line = @file.readline
+    # if request.post?
+    #   @messages = generate_data(false) unless params[:force_export]
+    #   if params[:force_export] or @messages.size.zero?
+    #     data = generate_data(true)
+    #     send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+    #   end
+    # end
+    # @first_line = @file.readline
     @columns = COLUMNS.collect{|k,v| [v[0], k]}
     @reversed_columns = {}
     for key, labels in COLUMNS
@@ -219,11 +346,11 @@ class CleanerController < ApplicationController
   protected
 
 
-  def generate_data(generate_else_test = true)
-    file = find_file
+  def generate_data(key, columns, generate_else_test = true)
+    file = find_file(key)
     file.readline
     headers = []
-    for k, v in params[:headers]
+    for k, v in columns
       headers[k.to_i] = (v.match(/__unused__/) ? nil : v.to_sym)
     end
     data, line_number, number, number_by_subscriber = '', 1, 0, {}

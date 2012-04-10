@@ -2,19 +2,34 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-* { font-family: "Open Sans", helvetica, sans-serif; font-size: 15px;}
+* { font-family: "Open Sans", helvetica, sans-serif; font-size: 15px; padding: 0; margin: 0;}
+a:link, a:visited, a:focus, a:active { color: #039; text-decoration: none;}
+a:hover { color: #04B; text-decoration: underline;}
 h1 { font-size: 2em; }
 body { background: #F1F2F3 }
+p { margin:0 0 0.7em; }
 #main { background: #FFF; width: 70%; margin: 2em auto; padding: 2em; box-shadow: 0 0 1em rgba(0,0,0,0.4)}
 
-fieldset { border: 1px solid #777 }
+fieldset { border: 1px solid #DDD; padding: 1ex;}
+fieldset legend { color: #555 ; font-weight: bold; padding: 0 10px;}
+fieldset.file legend { color: #576}
 .actions { text-align: center;padding: 1em; }
 .actions > * { margin: 0 1ex; }
 
-table.formic {width: 100%}
-table.formic td.label { text-align: right; font-weight: normal; width: 33%; padding: 0 1ex;}
-table.formic td.example { color: #777; padding: 0 1ex; }
+table.formic {width: 100%; border-collapse: collapse;}
+table.formic td.label, label { text-align: right; font-weight: normal; width: 30%; padding: 0 1ex;}
+table.formic td.input { 
+                        select, input {  width: 95% ; }
+                        input[size] {  width: auto ; }
+}
+table.formic td.example { color: #777; padding: 0 1ex; width: 30%;}
 
+.success { color: #070; margin: 0;}
 .error, .errors li p { color: #900; margin: 0;}
 .errors em {color: #C00;}
 .errors h2 {font-size: 1.4em;}
+
+tr.upload td.input { padding: 1em 0;}
+tr.invalid td { background: #FED}
+
+.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; background: rgba(50,100,200,0.1); margin-right: -9px;}

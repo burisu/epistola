@@ -1,0 +1,20 @@
+-id = matching[:key]
+%fieldset
+  %legend=matching[:label]
+  =hidden_field_tag("matchings[#{id}][key]", matching[:key])
+  =hidden_field_tag("matchings[#{id}][label]", matching[:label])
+  -if messages = matching[:messages]
+    .errors
+      %h2.error="#{messages.size} problèmes ont été rencontrés&nbsp;:".html_safe
+      %ul
+        -for message in messages
+          %li
+            %p=message
+
+  %table.formic
+    -params[:matchings] ||= {}
+    -matching[:headers].each_with_index do |header, index|
+      %tr.column
+        %td.label=header
+        %td.input=select_tag("matchings[#{id}][columns][#{index}]", options_for_select(@columns, (matching[:columns].is_a?(Hash) ? matching[:columns][index.to_s] : nil)||@reversed_columns[header.to_s.codeize]))
+        %td.example=matching[:first_line][index]

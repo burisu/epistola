@@ -4,15 +4,14 @@
 %p
   Les colonnes utilisables sont&nbsp;:
   =@columns.collect{|x| content_tag(:strong, x)}.to_sentence.html_safe
--unless flash[:error].blank?
-  .error=flash[:error].to_s
 
 =form_tag({:action=>:upload}, :multipart=>true) do
   %fieldset
-    %legend Import
+    %legend Fichiers à importer
     %table.formic
-      %tr
-        %td.label Fichier
-        %td.input=file_field_tag(:listing)
+      %tbody#uploads=render :partial=>"upload", :collection=>@listings
+    .actions
+      =link_to("Ajouter un fichier", {:action=>:add_upload}, :remote=>true, "data-update"=>"#uploads", "data-update-at"=>"bottom")
+
   .actions
     =submit_tag("Envoyer")

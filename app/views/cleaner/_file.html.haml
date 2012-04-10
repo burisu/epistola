@@ -1,0 +1,27 @@
+%fieldset.file{:id=>"fs-#{file[:key]}"}
+  %legend=file[:label]
+  =hidden_field_tag("files[#{file[:key]}][key]", file[:key])
+  =hidden_field_tag("files[#{file[:key]}][label]", file[:label])
+  =hidden_field_tag("files[#{file[:key]}][uploaded]", file[:uploaded].to_s)
+  =link_to("Enlever", "#", "data-remove"=>"#fs-#{file[:key]}", :class=>"remove-me")
+  -if file[:uploaded]
+
+
+
+
+  -else
+    %p Il faut sélectionner le fichier d'adresses au format CSV (Encodage UTF-8 et des virgules en guise de séparateur). La première ligne est considérée comme une ligne d'en-têtes.
+    %p
+      Les colonnes utilisables sont&nbsp;:
+      =@columns.collect{|x| content_tag(:strong, x)}.to_sentence.html_safe
+
+    =form_tag({}, :multipart=>true, "data-update"=>"#fs-#{file[:key]}", "data-update-at"=>"replace", :remote=>true) do
+      =hidden_field_tag("file[key]", file[:key])
+      =hidden_field_tag("file[label]", file[:label])
+      =hidden_field_tag("file[uploaded]", "false")
+      %table.formic
+        %tr
+          %td.label Sélectionnez le fichier à importer
+          %td.input=file_field_tag("file[data]")
+      .actions
+        =submit_tag("Envoyer le fichier")

@@ -1,0 +1,27 @@
+%h1 Vérification et génération de fichier de routage
+%p=link_to("Importer", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top")+", vérifier, fusionner et exporter vos fichiers d'adresses.".html_safe
+
+
+-#=form_tag({:action => :export}, :multipart=>true) do
+.all
+  #files
+
+  -#%fieldset
+    %legend Vérification
+    %table.formic
+      %tr
+        %td.label Nombre de caractère maximum par ligne
+        %td.input=text_field_tag("line_size", params["line_size"], :size=>4, :maxlength=>4)
+
+  %fieldset
+    %legend Export
+    %table.formic
+      %tr
+        %td.label Préfixe N°Abonné
+        %td.input=text_field_tag("subscriber_prefix", params["subscriber_prefix"])
+      %tr
+        %td.label Nom du fichier à exporter
+        %td.input=text_field_tag("export_file", params["export_file"])
+      
+  .actions
+    =submit_tag("Exporter")

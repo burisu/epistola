@@ -1,0 +1,12 @@
+-upload = file_upload
+%legend=upload[:label]
+=hidden_field_tag("uploads[#{upload[:key]}][key]", upload[:key])
+=hidden_field_tag("uploads[#{upload[:key]}][label]", upload[:label])
+=hidden_field_tag("uploads[#{upload[:key]}][uploaded]", upload[:uploaded].to_s)
+-if upload[:uploaded]
+  %label Téléchargé avec succès
+-else
+  =file_field_tag("uploads[#{upload[:key]}][data]")
+  -if upload[:error]
+    .error=upload[:error]
+ %td=link_to("Supprimer", "#", "data-remove"=>"##{upload[:key]}")
