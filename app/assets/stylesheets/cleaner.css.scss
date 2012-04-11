@@ -10,12 +10,23 @@ a:hover { color: #04B; text-decoration: underline;}
 h1 { font-size: 2em; }
 body { background: #F1F2F3 }
 p { margin:0 0 0.7em; }
-#main { background: #FFF; width: 70%; margin: 2em auto; padding: 2em; box-shadow: 0 0 1em rgba(0,0,0,0.4)}
+#page { background: #FFF; width: 70%; margin: 2em auto; box-shadow: 0 0 1em rgba(0,0,0,0.4)}
+#banner {  background-image: -moz-linear-gradient(bottom, #222 0%, #4D4D4D 75%, #444 100%); padding: 10px 20px; vertical-align: center;}
+#banner * { color: rgba(255,255,255,0.9); font-size: 3em;}
+#banner .title { font-weight: bold; text-shadow: 0 0 32px #027, 0 0 16px #15A, 0 0 8px #58F, 0 0 4px #DEF}
+#banner .slogan { font-size: 2em; font-style: italic; color: rgba(255,0,0,0.7); text-shadow: 0 0 15px #000; }
+
+#main { background: #FFF; padding: 2em; }
+
+#files {padding: 1em 0}
 
 fieldset { border: 1px solid #DDD; padding: 1ex;}
+.spacer { height: 1px; background: #DDD; margin: 1ex 0;};
 fieldset legend { color: #555 ; font-weight: bold; padding: 0 10px; font-variant: small-caps; font-size: 150%;}
 fieldset.file legend { color: #D42; }
-.actions { text-align: center;padding: 1em; }
+
+.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; box-shadow: 0 0 20px rgba(64,128,255,0.2) inset; margin-right: -9px;}
+.actions { text-align: center; padding: 0.5em; margin: 0.5em 0 0 0; box-shadow: 0 0 20px rgba(64,128,255,0.2) inset; }
 .actions > * { margin: 0 1ex; }
 
 table.formic {width: 100%; border-collapse: collapse;}
@@ -35,6 +46,6 @@ ul { padding: 1ex 0 1ex 2em}
 tr.upload td.input { padding: 1em 0;}
 tr.invalid td { background: #FED}
 
-.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; background: rgba(50,100,200,0.1); margin-right: -9px;}
 
 .fs-overlay { background: rgba(0,0,0,0.1) image-url("ajax-loader.gif") no-repeat center; box-shadow: 0 0 20px #FFF inset; }
+

@@ -30,6 +30,12 @@
             %td.label=header
             %td.input=select_tag("file[columns][#{index}]", options_for_select(@columns, (file[:columns].is_a?(Hash) ? file[:columns][index.to_s] : nil)||@reversed_columns[header.to_s.codeize]))
             %td.example=file[:first_line][index]
+      .spacer  
+      %table.formic
+        %tr
+          %td.label Nombre de caractère maximum par ligne
+          %td.input=text_field_tag("line_size", params[:line_size], :size=>4, :maxlength=>4)
+
       .actions
         =submit_tag("Effectuer une vérification")
 

@@ -28,10 +28,10 @@ class CleanerController < ApplicationController
     :__unused__ => ["— Non utilisé —", ""],
     :subscriber_id => ["N°Abonné", "N°Client", "NCLI", "Numéro"], 
     :subscription_id => ["N°Abonnement", "ID"],
-    :first_name => ["Prénom"],
-    :last_name => ["Nom de famille", "Nom"],
     :title => ["Titre/Civilités", "Titre", "Civilité", "Civilités"],
     :last_name_and_first_name => ["Nom de famille & prénom", "Nom de famille et prénom", "Nom et prénom", "Nom prénom", "L1"],
+    :last_name => ["Nom de famille", "Nom"],
+    :first_name => ["Prénom"],
     :line_2 => ["Destinataire ou service", "Destinataire, service", "Adresse 1", "Ligne 2", "L2", "Complément", "CIDE"],
     :line_3 => ["Bâtiment, résidence, ZI...", "Bat, res, zi", "Adresse 2", "Ligne 3", "L3"],
     :line_4 => ["N° & voie", "N° et voie", "Adresse", "Adresse 3", "Ligne 4", "L4"],
@@ -48,14 +48,14 @@ class CleanerController < ApplicationController
               :quote => false,
               :normalize => Proc.new do |headers, params|
                 code = ""
-                if headers.contains?(:quantity, :subscription_id)
-                  code << "line[:subscription_id].to_s.rjust(9, '0')+qindex.to_s.upcase.rjust(3, '0')"
-                elsif headers.contains?(:subscriber_id)
-                  code << "line[:subscriber_id].to_s.rjust(6, '0')+number_by_subscriber[line[:subscriber_id]].to_s.upcase.rjust(3, '0')"
-                else
-                  code << "number.to_s.rjust(6, '0')"
-                end
-                code = params[:subscriber_prefix].to_s.inspect+"+"+code if params[:subscriber_prefix]
+                # if headers.contains?(:quantity, :subscription_id)
+                #   code << "SUBSCRIPTION_ID.to_s.rjust(9, '0')+qindex.to_s.upcase.rjust(3, '0')"
+                # elsif headers.contains?(:subscriber_id)
+                #   code << "SUBSCRIBER_ID.to_s.rjust(6, '0')+number_by_subscriber[SUBSCRIBER_ID].to_s.upcase.rjust(3, '0')"
+                # else
+                code << "file_number.to_s.rjust(2, '0')[-2..-1]+number.to_s.rjust(6, '0')"
+                # end
+                code = params[:subscriber_prefix].to_s.inspect+"+"+code unless params[:subscriber_prefix].blank?
                 code
               end},
             { :label => "Titre",
@@ -64,11 +64,11 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:last_name_and_first_name, :title)
-                  code << "(title=line[:title].to_s.strip.upper_ascii; (line[:last_name_and_first_name].to_s.strip.upper_ascii.match(/\\b\#{title}\\b/) ? '' : title))"
+                  code << "(title=TITLE.to_s.strip.upper_ascii; (LAST_NAME_AND_FIRST_NAME.to_s.strip.upper_ascii.match(/\\b\#{title}\\b/) ? '' : title))"
                 elsif headers.contains?(:last_name, :title)
-                  code << "(title=line[:title].to_s.strip.upper_ascii; (line[:last_name].to_s.strip.upper_ascii.match(/\\b\#{title}\\b/) ? '' : title))"
+                  code << "(title=TITLE.to_s.strip.upper_ascii; (LAST_NAME.to_s.strip.upper_ascii.match(/\\b\#{title}\\b/) ? '' : title))"
                 elsif headers.contains?(:title)
-                  code << "line[:title].to_s.strip.upper_ascii"
+                  code << "TITLE.to_s.strip.upper_ascii"
                 else
                   code << "''"
                 end
@@ -81,9 +81,9 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:last_name_and_first_name)
-                  code << "line[:last_name_and_first_name].to_s.strip.upper_ascii"
+                  code << "LAST_NAME_AND_FIRST_NAME.to_s.strip.upper_ascii"
                 elsif headers.contains?(:last_name, :first_name)
-                  code << "(line[:last_name].to_s+' '+line[:first_name].to_s).strip.upper_ascii"
+                  code << "(LAST_NAME.to_s+' '+FIRST_NAME.to_s).strip.upper_ascii"
                 else
                   code << "''"
                 end
@@ -96,7 +96,7 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:line_2)
-                  code << "line[:line_2].to_s.upper_ascii"
+                  code << "LINE_2.to_s.upper_ascii"
                 else
                   code << "''"
                 end
@@ -109,7 +109,7 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:line_3)
-                  code << "line[:line_3].to_s.upper_ascii"
+                  code << "LINE_3.to_s.upper_ascii"
                 else
                   code << "''"
                 end
@@ -122,7 +122,7 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:line_4)
-                  code << "line[:line_4].to_s.upper_ascii"
+                  code << "LINE_4.to_s.upper_ascii"
                 else
                   code << "''"
                 end
@@ -135,7 +135,7 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:line_5)
-                  code << "line[:line_5].to_s.upper_ascii"
+                  code << "LINE_5.to_s.upper_ascii"
                 else
                   code << "''"
                 end
@@ -148,9 +148,9 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:post_code_and_city)
-                  code << "line[:post_code_and_city].to_s.split(' ')[0].upper_ascii"
+                  code << "POST_CODE_AND_CITY.to_s.split(' ')[0].upper_ascii"
                 elsif headers.contains?(:post_code)
-                  code << "line[:post_code].to_s.strip.upper_ascii"
+                  code << "POST_CODE.to_s.strip.upper_ascii"
                 else
                   code << "''"
                 end
@@ -163,9 +163,9 @@ class CleanerController < ApplicationController
               :normalize => Proc.new do |headers, params|
                 code = ""
                 if headers.contains?(:post_code_and_city)
-                  code << "line[:post_code_and_city].to_s.split(' ')[1..-1].join(' ').upper_ascii"
+                  code << "POST_CODE_AND_CITY.to_s.split(' ')[1..-1].join(' ').upper_ascii"
                 elsif headers.contains?(:city)
-                  code << "line[:city].to_s.strip.upper_ascii"
+                  code << "CITY.to_s.strip.upper_ascii"
                 else
                   code << "''"
                 end
@@ -181,7 +181,11 @@ class CleanerController < ApplicationController
 
   def index
     params[:export_file] ||= "AA.ASC"
-    params[:line_size] ||= 32
+    if request.post?
+      data = generate_data(params[:files].values, :mode => :export)
+      send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+    end
+
   end
 
 
@@ -193,6 +197,7 @@ class CleanerController < ApplicationController
   end
 
   def add_file
+    params[:line_size] = 32 if params[:line_size].to_i <= 0
     @columns_labels = COLUMNS.values.collect{|x| x[0]}
     @columns = COLUMNS.collect{|k,v| [v[0], k]}
     @reversed_columns = {}
@@ -242,7 +247,7 @@ class CleanerController < ApplicationController
       f = find_file(file[:key])
       file[:headers] = f.readline
       file[:first_line] = f.readline
-      file[:messages] = generate_data(file[:key], file[:columns], false)
+      file[:messages] = generate_data(file, :mode=>:test)
     elsif request.delete?
       
     else
@@ -270,232 +275,378 @@ class CleanerController < ApplicationController
 
 
 
-  # Generate a new key for a new upload
-  hide_action :new_upload
-  def new_upload()
-    key = @@uploads.dup
-    @@uploads.succ!
-    return {:key => key, :label => "Fichier #{key}", :uploaded => false}
-  end
+  # # Generate a new key for a new upload
+  # hide_action :new_upload
+  # def new_upload()
+  #   key = @@uploads.dup
+  #   @@uploads.succ!
+  #   return {:key => key, :label => "Fichier #{key}", :uploaded => false}
+  # end
 
-  # Configure list of listings to upload
-  def upload
-    @columns = COLUMNS.values.collect{|x| x[0]}
-    @listings = []
-    if request.post?
-      for letter, upload in params[:uploads]
-        listing = {}
-        if upload[:uploaded].to_s == 'true'
-          listing = upload.symbolize_keys
-          listing[:uploaded] = true
-        elsif upload[:data]
-          files_dir = Rails.root.join('tmp', 'cleaner')
-          FileUtils.mkdir_p(files_dir)
-          file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)[0..6]
-          File.open(files_dir.join(file_id), "wb") {|f| f.write(upload[:data].read) }
-          listing = {:label => upload[:data].original_filename.to_s, :key => file_id, :uploaded => true}
-          begin
-            file = find_file(file_id)
-            file.readline
-          rescue Exception => e
-            listing[:error] = "Le fichier CSV est mal formaté (#{e.class.name}: #{e.message})"
-            listing[:uploaded] = false
-          end
-        else
-          listing = upload.symbolize_keys
-          listing[:error] = "Merci de fournir un fichier ou de supprimer la ligne"
-          listing[:uploaded] = false          
-        end
-        @listings << listing
-      end
-      unless @listings.detect{|x| !x[:uploaded]}
-        listings = {}
-        @listings.each_with_index{|l, i| listings[i] = {:key=>l[:key], :label=>l[:label]}}
-        redirect_to :action=>:columns, :listings=>listings # .delete_if{|k,v| ![:key, :label].include?(k)}
-      end
-    else
-      @listings << new_upload
-    end
-  end
+  # # Configure list of listings to upload
+  # def upload
+  #   @columns = COLUMNS.values.collect{|x| x[0]}
+  #   @listings = []
+  #   if request.post?
+  #     for letter, upload in params[:uploads]
+  #       listing = {}
+  #       if upload[:uploaded].to_s == 'true'
+  #         listing = upload.symbolize_keys
+  #         listing[:uploaded] = true
+  #       elsif upload[:data]
+  #         files_dir = Rails.root.join('tmp', 'cleaner')
+  #         FileUtils.mkdir_p(files_dir)
+  #         file_id = Time.now.to_i.to_s(36)+rand.to_s[2..-1].to_i.to_s(36)[0..6]
+  #         File.open(files_dir.join(file_id), "wb") {|f| f.write(upload[:data].read) }
+  #         listing = {:label => upload[:data].original_filename.to_s, :key => file_id, :uploaded => true}
+  #         begin
+  #           file = find_file(file_id)
+  #           file.readline
+  #         rescue Exception => e
+  #           listing[:error] = "Le fichier CSV est mal formaté (#{e.class.name}: #{e.message})"
+  #           listing[:uploaded] = false
+  #         end
+  #       else
+  #         listing = upload.symbolize_keys
+  #         listing[:error] = "Merci de fournir un fichier ou de supprimer la ligne"
+  #         listing[:uploaded] = false          
+  #       end
+  #       @listings << listing
+  #     end
+  #     unless @listings.detect{|x| !x[:uploaded]}
+  #       listings = {}
+  #       @listings.each_with_index{|l, i| listings[i] = {:key=>l[:key], :label=>l[:label]}}
+  #       redirect_to :action=>:columns, :listings=>listings # .delete_if{|k,v| ![:key, :label].include?(k)}
+  #     end
+  #   else
+  #     @listings << new_upload
+  #   end
+  # end
 
-  # Adds a new line for an upload
-  def add_upload
-    render :partial=>"cleaner/upload", :object => new_upload
-  end
+  # # Adds a new line for an upload
+  # def add_upload
+  #   render :partial=>"cleaner/upload", :object => new_upload
+  # end
 
-  # Configures columns of files
-  def columns
-    @matchings = []
-    for key, matching in params[:listings] || params[:matchings]
-      matching ||= {}
-      matching[:key] = matching[:key]
-      matching[:label] = matching[:label]
-      file = find_file(matching[:key])
-      matching[:headers] = file.readline
-      matching[:first_line] = file.readline
+  # # Configures columns of files
+  # def columns
+  #   @matchings = []
+  #   for key, matching in params[:listings] || params[:matchings]
+  #     matching ||= {}
+  #     matching[:key] = matching[:key]
+  #     matching[:label] = matching[:label]
+  #     file = find_file(matching[:key])
+  #     matching[:headers] = file.readline
+  #     matching[:first_line] = file.readline
       
-      if request.post?
-        matching[:messages] = generate_data(matching[:key], matching[:columns], false) unless params[:force_export]
-      end
+  #     if request.post?
+  #       matching[:messages] = generate_data(matching[:key], matching[:columns], false) unless params[:force_export]
+  #     end
       
-      @matchings << matching
-    end
+  #     @matchings << matching
+  #   end
     
 
 
-    # if params[:force_export] or messages.size.zero?
-    #   data = generate_data(key, true)
-    #   send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
-    # end
+  #   # if params[:force_export] or messages.size.zero?
+  #   #   data = generate_data(key, true)
+  #   #   send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+  #   # end
 
-    # @file = find_file
-    # @headers = @file.readline
-    params[:export_file] ||= "AA.ASC"
-    params[:line_size] ||= 32
-    # if request.post?
-    #   @messages = generate_data(false) unless params[:force_export]
-    #   if params[:force_export] or @messages.size.zero?
-    #     data = generate_data(true)
-    #     send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
-    #   end
-    # end
-    # @first_line = @file.readline
-    @columns = COLUMNS.collect{|k,v| [v[0], k]}
-    @reversed_columns = {}
-    for key, labels in COLUMNS
-      for label in labels
-        @reversed_columns[label.codeize] = key
-      end
-    end
-  end
+  #   # @file = find_file
+  #   # @headers = @file.readline
+  #   params[:export_file] ||= "AA.ASC"
+  #   params[:line_size] ||= 32
+  #   # if request.post?
+  #   #   @messages = generate_data(false) unless params[:force_export]
+  #   #   if params[:force_export] or @messages.size.zero?
+  #   #     data = generate_data(true)
+  #   #     send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+  #   #   end
+  #   # end
+  #   # @first_line = @file.readline
+  #   @columns = COLUMNS.collect{|k,v| [v[0], k]}
+  #   @reversed_columns = {}
+  #   for key, labels in COLUMNS
+  #     for label in labels
+  #       @reversed_columns[label.codeize] = key
+  #     end
+  #   end
+  # end
 
   protected
 
 
-  def generate_data(key, columns, generate_else_test = true)
-    file = find_file(key)
-    file.readline
-    headers = []
-    for k, v in columns
-      headers[k.to_i] = (v.match(/__unused__/) ? nil : v.to_sym)
-    end
-    data, line_number, number, number_by_subscriber = '', 1, 0, {}
-    excep, messages = [], []
-    data.force_encoding('US-ASCII')
-    code, line = "", ""
-
-
+  def check_columns(columns)
+    messages = []
     doubles = []
-    sheaders = headers.compact.sort # {|a,b| a.to_s <=> b.to_s}
-    sheaders.each_with_index{|x,i| doubles << x if x == sheaders[i+1]}
+    scolumns = columns.compact.sort # {|a,b| a.to_s <=> b.to_s}
+    scolumns.each_with_index{|x,i| doubles << x if x == scolumns[i+1]}
     unless doubles.empty?
       doubles = doubles.uniq.collect{|h| '<em>'+COLUMNS[h][0]+'</em>'}
       messages << "ERREUR : Des colonnes sont définies plusieurs fois (#{doubles.to_sentence})".html_safe
     end
     
     missing_columns = []
-
+    
     # Last name & First name
-    if headers.include?(:last_name_and_first_name)
+    if columns.include?(:last_name_and_first_name)
       multicol = COLUMNS[:last_name_and_first_name][0]
-      if headers.include?(:last_name)
+      if columns.include?(:last_name)
         messages << "ERREUR : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
-      if headers.contains?(:first_name)
+      if columns.contains?(:first_name)
         messages << "ERREUR : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
-    elsif !headers.contains?(:last_name, :first_name)
-      missing_columns << :last_name unless headers.include?(:last_name)
-      missing_columns << :first_name unless headers.include?(:first_name)
+    elsif !columns.contains?(:last_name, :first_name)
+      missing_columns << :last_name unless columns.include?(:last_name)
+      missing_columns << :first_name unless columns.include?(:first_name)
     end
-
+    
     # Post code & City
-    if headers.include?(:post_code_and_city)
+    if columns.include?(:post_code_and_city)
       multicol = COLUMNS[:post_code_and_city][0]
-      if headers.include?(:post_code)
+      if columns.include?(:post_code)
         messages << "ERREUR : La colonne <em>#{COLUMNS[:post_code][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
-      if headers.contains?(:city)
+      if columns.contains?(:city)
         messages << "ERREUR : La colonne <em>#{COLUMNS[:city][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
       end
-    elsif !headers.contains?(:post_code, :city)
-      missing_columns << :post_code unless headers.include?(:post_code)
-      missing_columns << :city unless headers.include?(:city)
+    elsif !columns.contains?(:post_code, :city)
+      missing_columns << :post_code unless columns.include?(:post_code)
+      missing_columns << :city unless columns.include?(:city)
     end
-
+    
     # Missing columns
     if missing_columns.size > 0
       messages << ("ERREUR : Des colonnes ne sont pas définies : "+missing_columns.collect{|c| '<em>'+COLUMNS[c][0]+'</em>'}.to_sentence).html_safe
     end
+    return messages
+  end
+
+
+  def generate_data(specs, options = {})
+
+    data, number = '', 0
+    messages = []
+    data.force_encoding('US-ASCII')
+    code = ""
+    mode = options[:mode] || :test
+
+    code << "number = 0\n"
+    code << "data = ''\n"
     
-    return messages unless generate_else_test or messages.empty?
-    
-    line = "data"
-    EXPORT.each_with_index do |column, index|
-      line << " << ';'" if index > 0
-      ncode = column[:normalize][headers, params]
-      ncode =  '\'"\'+(' + ncode + ').gsub(/\"/, "\'\'")+\'"\'' if column[:quote]
-      line << " << " + ncode
-    end
-    line << ' << "\n"'
-    
-    unless generate_else_test
-      line_size = params[:line_size].to_i
-      line_size = 38 if line_size.zero?
-      line << "\n"
-      for l in [:line_2, :line_3, :line_4, :line_5]
-        if headers.include?(l)
-          col = export_column(l)
-          line << "if (x = (#{col[:normalize][headers, params]}).strip).size > #{line_size}\n"
-          line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
-          line << "end\n"
+    specs = [specs] unless specs.is_a?(Array)
+    specs.each_with_index do |spec, spec_index|
+      file = find_file(spec[:key])
+      file.readline
+      headers = []
+      for k, v in spec[:columns]
+        headers[k.to_i] = (v.match(/__unused__/) ? nil : v.to_sym)
+      end
+
+      messages += check_columns(headers)
+
+      return messages unless mode == :export or messages.empty?
+      
+      line_code = ""
+
+      if mode == :export
+        line_code << "data"
+        EXPORT.each_with_index do |column, index|
+          line_code << " << ';'" if index > 0
+          ncode = column[:normalize][headers, params]
+          ncode =  '\'"\'+(' + ncode + ').gsub(/\"/, "\'\'")+\'"\'' if column[:quote]
+          line_code << " << " + ncode
+        end
+        line_code << ' << "\n"'
+        line_code << "\n"
+      end
+      
+      if mode == :test
+        line_size = params[:line_size].to_i
+        line_size = 38 if line_size.zero?
+        for l in [:line_2, :line_3, :line_4, :line_5]
+          if headers.include?(l)
+            col = export_column(l)
+            line_code << "if (x = (#{col[:normalize][headers, params]}).strip).size > #{line_size}\n"
+            line_code << "  messages << \"L\#{line_number} : <em>#{col[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+            line_code << "end\n"
+          end
+        end
+        col1 = export_column(:title)
+        col2 = export_column(:last_name_and_first_name)
+        line_code << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
+        line_code << "  messages << \"L\#{line_number} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+        line_code << "end\n"
+        
+        col1 = export_column(:post_code)
+        col2 = export_column(:city)
+        line_code << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
+        line_code << "  messages << \"L\#{line_number} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+        line_code << "end\n"
+      end
+
+      # Substitution of keys
+      for column in COLUMNS.keys
+        index = headers.index(column)
+        unless index.nil?
+          line_code.gsub!(/#{column.to_s.upcase}/, "line_array[#{index}]")
         end
       end
-      col1 = export_column(:title)
-      col2 = export_column(:last_name_and_first_name)
-      line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
-      line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
-      line << "end\n"
 
-      col1 = export_column(:post_code)
-      col2 = export_column(:city)
-      line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
-      line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
-      line << "end\n"
-    end
-
-
-
-    if headers.include?(:quantity)
-      line = "number_by_subscriber[line[:subscriber_id]] = (number_by_subscriber[line[:subscriber_id]] || 0) + 1\n" + line if headers.include?(:subscriber_id)
-      line = "number += 1\n" + line
-      line = "line[:quantity].to_i.times do |qindex|\n"+line.strip.gsub(/^/, '  ')+"\nend\n"
-    end
-
-    code << "data=''\n"
-    code << "for line_array in file.readlines\n"
-    code << "  line_number += 1\n"
-    code << "  line = {:__LINE__ => line_number"
-    headers.each_with_index do |h,i| 
-      code << ", :#{h} => line_array[#{i}]" unless h.nil?
-    end
-    code << "}\n"
-    code << "  excep << line[:__LINE__] if [line[:line_2], line[:line_3], line[:line_4], line[:line_5]].collect{|x| (x.blank? ? nil : x)}.compact.size > 3\n"
-    
-    unless headers.include?(:quantity)
+      code << "file = find_file('#{spec[:key]}')\n"
+      code << "file.readline\n"
+      code << "line_number = 1\n"
+      code << "file_number = #{spec_index+1}\n"
+      code << "for line_array in file.readlines\n"
       code << "  number += 1\n"
-      code << "  number_by_subscriber[line[:subscriber_id]] = (number_by_subscriber[line[:subscriber_id]] || 0) + 1\n" if headers.include?(:subscriber_id)
+      code << "  line_number += 1\n"
+      code << line_code.strip.gsub(/^/, '  ')+"\n"
+      code << "end\n"
+
     end
-    code << line.strip.gsub(/^/, '  ')+"\n"
-    code << "end\n"
+
     # code.split(/\n/).each_with_index{|l,i| puts((i+1).to_s.rjust(4)+": "+l)}
+
     eval(code)
-    if generate_else_test
+
+    if mode == :export
       return data
     else
       return messages
     end
   end
+
+
+
+
+
+
+  # def generate_data(key, columns, generate_else_test = true)
+  #   file = find_file(key)
+  #   file.readline
+  #   headers = []
+  #   for k, v in columns
+  #     headers[k.to_i] = (v.match(/__unused__/) ? nil : v.to_sym)
+  #   end
+  #   data, line_number, number, number_by_subscriber = '', 1, 0, {}
+  #   excep, messages = [], []
+  #   data.force_encoding('US-ASCII')
+  #   code, line = "", ""
+
+
+  #   doubles = []
+  #   sheaders = headers.compact.sort # {|a,b| a.to_s <=> b.to_s}
+  #   sheaders.each_with_index{|x,i| doubles << x if x == sheaders[i+1]}
+  #   unless doubles.empty?
+  #     doubles = doubles.uniq.collect{|h| '<em>'+COLUMNS[h][0]+'</em>'}
+  #     messages << "ERREUR : Des colonnes sont définies plusieurs fois (#{doubles.to_sentence})".html_safe
+  #   end
+  
+  #   missing_columns = []
+
+  #   # Last name & First name
+  #   if headers.include?(:last_name_and_first_name)
+  #     multicol = COLUMNS[:last_name_and_first_name][0]
+  #     if headers.include?(:last_name)
+  #       messages << "ERREUR : La colonne <em>#{COLUMNS[:last_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+  #     end
+  #     if headers.contains?(:first_name)
+  #       messages << "ERREUR : La colonne <em>#{COLUMNS[:first_name][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+  #     end
+  #   elsif !headers.contains?(:last_name, :first_name)
+  #     missing_columns << :last_name unless headers.include?(:last_name)
+  #     missing_columns << :first_name unless headers.include?(:first_name)
+  #   end
+
+  #   # Post code & City
+  #   if headers.include?(:post_code_and_city)
+  #     multicol = COLUMNS[:post_code_and_city][0]
+  #     if headers.include?(:post_code)
+  #       messages << "ERREUR : La colonne <em>#{COLUMNS[:post_code][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+  #     end
+  #     if headers.contains?(:city)
+  #       messages << "ERREUR : La colonne <em>#{COLUMNS[:city][0]}</em> ne sera pas prise en compte car <em>#{multicol}</em> est déjà défini".html_safe
+  #     end
+  #   elsif !headers.contains?(:post_code, :city)
+  #     missing_columns << :post_code unless headers.include?(:post_code)
+  #     missing_columns << :city unless headers.include?(:city)
+  #   end
+
+  #   # Missing columns
+  #   if missing_columns.size > 0
+  #     messages << ("ERREUR : Des colonnes ne sont pas définies : "+missing_columns.collect{|c| '<em>'+COLUMNS[c][0]+'</em>'}.to_sentence).html_safe
+  #   end
+  
+  #   return messages unless generate_else_test or messages.empty?
+  
+  #   line = "data"
+  #   EXPORT.each_with_index do |column, index|
+  #     line << " << ';'" if index > 0
+  #     ncode = column[:normalize][headers, params]
+  #     ncode =  '\'"\'+(' + ncode + ').gsub(/\"/, "\'\'")+\'"\'' if column[:quote]
+  #     line << " << " + ncode
+  #   end
+  #   line << ' << "\n"'
+  
+  #   unless generate_else_test
+  #     line_size = params[:line_size].to_i
+  #     line_size = 38 if line_size.zero?
+  #     line << "\n"
+  #     for l in [:line_2, :line_3, :line_4, :line_5]
+  #       if headers.include?(l)
+  #         col = export_column(l)
+  #         line << "if (x = (#{col[:normalize][headers, params]}).strip).size > #{line_size}\n"
+  #         line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+  #         line << "end\n"
+  #       end
+  #     end
+  #     col1 = export_column(:title)
+  #     col2 = export_column(:last_name_and_first_name)
+  #     line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
+  #     line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+  #     line << "end\n"
+
+  #     col1 = export_column(:post_code)
+  #     col2 = export_column(:city)
+  #     line << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
+  #     line << "  messages << \"L\#{line[:__LINE__]} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+  #     line << "end\n"
+  #   end
+
+
+
+  #   if headers.include?(:quantity)
+  #     line = "number_by_subscriber[line[:subscriber_id]] = (number_by_subscriber[line[:subscriber_id]] || 0) + 1\n" + line if headers.include?(:subscriber_id)
+  #     line = "number += 1\n" + line
+  #     line = "line[:quantity].to_i.times do |qindex|\n"+line.strip.gsub(/^/, '  ')+"\nend\n"
+  #   end
+
+  #   code << "data=''\n"
+  #   code << "for line_array in file.readlines\n"
+  #   code << "  line_number += 1\n"
+  #   code << "  line = {:__LINE__ => line_number"
+  #   headers.each_with_index do |h,i| 
+  #     code << ", :#{h} => line_array[#{i}]" unless h.nil?
+  #   end
+  #   code << "}\n"
+  #   code << "  excep << line[:__LINE__] if [line[:line_2], line[:line_3], line[:line_4], line[:line_5]].collect{|x| (x.blank? ? nil : x)}.compact.size > 3\n"
+  
+  #   unless headers.include?(:quantity)
+  #     code << "  number += 1\n"
+  #     code << "  number_by_subscriber[line[:subscriber_id]] = (number_by_subscriber[line[:subscriber_id]] || 0) + 1\n" if headers.include?(:subscriber_id)
+  #   end
+  #   code << line.strip.gsub(/^/, '  ')+"\n"
+  #   code << "end\n"
+  #   # code.split(/\n/).each_with_index{|l,i| puts((i+1).to_s.rjust(4)+": "+l)}
+  #   eval(code)
+  #   if generate_else_test
+  #     return data
+  #   else
+  #     return messages
+  #   end
+  # end
 
   def export_column(name)
     return EXPORT.select{|h| h[:name] == name}[0]

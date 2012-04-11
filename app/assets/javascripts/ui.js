@@ -20,7 +20,9 @@ $("*[data-update]").live("ajax:success", function (event, data, status, xhr) {
 });
 
 $("a[data-remove]").live("click", function () {
-    $($(this).data("remove")).fadeOut();
+    $($(this).data("remove")).fadeOut('fast', function() {
+	$(this).remove();
+    });
     return false;
 });
 
@@ -41,24 +43,28 @@ $("form[data-remote][data-disable]").live("ajax:complete", function (event) {
     var element = $(this), target;
     target = $('#' + element.data("disable"));
     // target.attr("disabled", "false");
-    target.children('.fs-overlay').fadeOut();
-    target.children('.fs-overlay').remove();
+    target.children('.fs-overlay').fadeOut('fast', function() {
+	$(this).remove();
+    });
 });
 
-$("form[data-collect]").submit(function () {
+$("form[data-collect]").live("submit", function (event) {
     // Duplicates 
-    var form = $(this), targets, collector = $("<div></div>");
-    targets = $(form.data("collect"));
+    var form = $(this), collector = $("<div></div>");
     form.children('.data-collector').remove();
+    collector.addClass("data-collector").css("display", "none");
     form.append(collector);
-    overlay.addClass("data-collector").css("display", "none");
-    targets.each(function (target) {
-	target.serializeArray().each(function (couple) {
-	    var hf = $("<input type='hidden'></input>");
-	    hf.attr(couple);
-	    alert(couple.name);
-	    collector.append(hf);
+    $(form.data("collect")).each(function (index) {
+	$.each($(this).serializeArray(), function (j, couple) {
+	    var hf, name, start = new RegExp("^file\\[", "ig");
+	    name = couple.name;
+	    if (start.test(name)) {
+		hf = $("<input type='hidden'></input>");
+		name = name.replace(start, "files["+index+"][");
+		hf.attr({name: name, value: couple.value});
+		collector.append(hf);
+	    }
 	});
     });
-    return false;
+    return true;
 });
