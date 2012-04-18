@@ -1,11 +1,10 @@
 -fsid = "fs-#{file[:key]}"
-%fieldset.file{:id=>fsid}
-  %legend
-    =file[:label]
+.file{:id=>fsid}
+  =link_to("Enlever", "#", "data-remove"=>"#fs-#{file[:key]}", :class=>"remove-me")
+  %h2.title=file[:label]
   =hidden_field_tag("files[#{file[:key]}][key]", file[:key])
   =hidden_field_tag("files[#{file[:key]}][label]", file[:label])
   =hidden_field_tag("files[#{file[:key]}][uploaded]", file[:uploaded].to_s)
-  =link_to("Enlever", "#", "data-remove"=>"#fs-#{file[:key]}", :class=>"remove-me")
   -if file[:uploaded]
     %p
       Il faut mettre en face de chaque colonne sa correspondance. Une reconnaissance triviale est effectuée automatiquement en fonction des en-têtes de colonne.
@@ -23,18 +22,19 @@
             -for message in messages
               %li
                 %p=message
-      %table.formic
-        -file[:columns] ||= {}
-        -file[:headers].each_with_index do |header, index|
-          %tr.column
-            %td.label=header
-            %td.input=select_tag("file[columns][#{index}]", options_for_select(@columns, (file[:columns].is_a?(Hash) ? file[:columns][index.to_s] : nil)||@reversed_columns[header.to_s.codeize]))
-            %td.example=file[:first_line][index]
-      .spacer  
-      %table.formic
-        %tr
-          %td.label Nombre de caractère maximum par ligne
-          %td.input=text_field_tag("line_size", params[:line_size], :size=>4, :maxlength=>4)
+      .fields
+        %table.formic
+          -file[:columns] ||= {}
+          -file[:headers].each_with_index do |header, index|
+            %tr.column
+              %td.label=header
+              %td.input=select_tag("file[columns][#{index}]", options_for_select(@columns, (file[:columns].is_a?(Hash) ? file[:columns][index.to_s] : nil)||@reversed_columns[header.to_s.codeize]))
+              %td.example=file[:first_line][index]
+        .spacer  
+        %table.formic
+          %tr
+            %td.label Nombre de caractère maximum par ligne
+            %td.input=text_field_tag("line_size", params[:line_size], :size=>4, :maxlength=>4)
 
       .actions
         =submit_tag("Effectuer une vérification")

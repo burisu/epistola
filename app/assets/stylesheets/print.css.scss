@@ -1,0 +1,6 @@
+@media print {
+  * { font-size: 10pt }
+  #page { width: 100%; margin: 0; padding: 0; box-shadow: none;}
+  #banner, #import, #export, #github, .fields, .actions, .remove-me{ display: none; }
+  .file { padding:0; border: none; }
+}

@@ -182,13 +182,17 @@ class CleanerController < ApplicationController
   def index
     params[:export_file] ||= "AA.ASC"
     if request.post?
-      data = generate_data(params[:files].values, :mode => :export)
-      send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+      if params[:files]
+        data = generate_data(params[:files].values, :mode => :export)
+        send_data(data, :type=>:text, :filename=>(params[:export_file]||'export.csv'))
+      else
+        
+      end
     end
 
   end
 
-
+  @@uploads = "A" unless defined? @@uploads
   hide_action :new_upload
   def new_file()
     key = @@uploads.dup
@@ -374,6 +378,11 @@ class CleanerController < ApplicationController
         line_code << "end\n"
       end
 
+      if headers.include?(:quantity)
+        line_code = "number += 1\n" + line_code
+        line_code = "QUANTITY.to_i.times do |qindex|\n"+line_code.strip.gsub(/^/, ' ')+"\nend\n"
+      end
+
       # Substitution of keys
       for column in COLUMNS.keys
         index = headers.index(column)
@@ -387,8 +396,10 @@ class CleanerController < ApplicationController
       code << "line_number = 1\n"
       code << "file_number = #{spec_index+1}\n"
       code << "for line_array in file.readlines\n"
-      code << "  number += 1\n"
       code << "  line_number += 1\n"
+      unless headers.include?(:quantity)
+        code << "  number += 1\n"
+      end
       code << line_code.strip.gsub(/^/, '  ')+"\n"
       code << "end\n"
 

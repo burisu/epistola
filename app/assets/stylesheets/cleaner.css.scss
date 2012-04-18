@@ -20,10 +20,10 @@ p { margin:0 0 0.7em; }
 
 #files {padding: 1em 0}
 
-fieldset { border: 1px solid #DDD; padding: 1ex;}
+fieldset, .file { border: 1px solid #DDD; padding: 1ex; margin: 1em 0;}
 .spacer { height: 1px; background: #DDD; margin: 1ex 0;};
-fieldset legend { color: #555 ; font-weight: bold; padding: 0 10px; font-variant: small-caps; font-size: 150%;}
-fieldset.file legend { color: #D42; }
+.file .title, fieldset legend { color: #555 ; font-weight: bold; padding: 0 10px; font-variant: small-caps; font-size: 150%;}
+.file .title { color: #D42; padding: 0; }
 
 .remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; box-shadow: 0 0 20px rgba(64,128,255,0.2) inset; margin-right: -9px;}
 .actions { text-align: center; padding: 0.5em; margin: 0.5em 0 0 0; box-shadow: 0 0 20px rgba(64,128,255,0.2) inset; }
@@ -40,7 +40,7 @@ table.formic td.example { color: #777; padding: 0 1ex; width: 30%;}
 .success { color: #070; margin: 0;}
 .error, .errors li p { color: #900; margin: 0;}
 .errors em {color: #C00;}
-.errors h2 {font-size: 1.4em;}
+.errors h2 {font-size: 1.2em;}
 
 ul { padding: 1ex 0 1ex 2em}
 tr.upload td.input { padding: 1em 0;}

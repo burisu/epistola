@@ -1,8 +1,8 @@
-.actions=link_to("Importer un nouveau fichier", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top")
+#import.actions=link_to("Importer un nouveau fichier", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top")
 
 #files
 
-=form_tag({}, "data-collect"=>"form.exportable") do
+=form_tag({}, "data-collect"=>"form.exportable", :id=>"export") do
   %fieldset
     %legend Export
     %table.formic
