@@ -1,7 +1,7 @@
 // Place all the styles related to the cleaner controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
-
+@import "compass/css3";
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic);
 
 * { font-family: "Open Sans", helvetica, sans-serif; font-size: 15px; padding: 0; margin: 0;}
@@ -25,8 +25,8 @@ fieldset, .file { border: 1px solid #DDD; padding: 1ex; margin: 1em 0;}
 .file .title, fieldset legend { color: #555 ; font-weight: bold; padding: 0 10px; font-variant: small-caps; font-size: 150%;}
 .file .title { color: #D42; padding: 0; }
 
-.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; box-shadow: 0 0 20px rgba(64,128,255,0.2) inset; margin-right: -9px;}
-.actions { text-align: center; padding: 0.5em; margin: 0.5em 0 0 0; box-shadow: 0 0 20px rgba(64,128,255,0.2) inset; }
+.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; @include box-shadow(0 0 20px rgba(64,128,255,0.2) inset); margin-right: -9px;}
+.actions { text-align: center; padding: 0.5em; margin: 0.5em 0 0 0; @include box-shadow(0 0 20px rgba(64,128,255,0.2) inset); }
 .actions > * { margin: 0 1ex; }
 
 table.formic {width: 100%; border-collapse: collapse;}

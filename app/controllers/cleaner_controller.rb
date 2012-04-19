@@ -376,6 +376,10 @@ class CleanerController < ApplicationController
         line_code << "if (x = (#{col1[:normalize][headers, params]}+' '+#{col2[:normalize][headers, params]}).strip).size > #{line_size}\n"
         line_code << "  messages << \"L\#{line_number} : <em>#{col1[:label]} #{col2[:label]}</em> est sur plus de #{line_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
         line_code << "end\n"
+        post_code_size = 5
+        line_code << "if (x = (#{col1[:normalize][headers, params]}).strip).size > #{post_code_size}\n"
+        line_code << "  messages << \"L\#{line_number} : <em>#{col1[:label]}</em> est sur plus de #{post_code_size} car. (\#{x.size} car. pour <em>\#{x}</em>).\".html_safe\n"
+        line_code << "end\n"
       end
 
       if headers.include?(:quantity)
