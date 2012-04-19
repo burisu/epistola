@@ -48,12 +48,13 @@ class CleanerController < ApplicationController
               :quote => false,
               :normalize => Proc.new do |headers, params|
                 code = ""
-                # if headers.contains?(:quantity, :subscription_id)
-                #   code << "SUBSCRIPTION_ID.to_s.rjust(9, '0')+qindex.to_s.upcase.rjust(3, '0')"
-                # elsif headers.contains?(:subscriber_id)
-                #   code << "SUBSCRIBER_ID.to_s.rjust(6, '0')+number_by_subscriber[SUBSCRIBER_ID].to_s.upcase.rjust(3, '0')"
-                # else
-                code << "file_number.to_s.rjust(2, '0')[-2..-1]+number.to_s.rjust(6, '0')"
+                # # if headers.contains?(:quantity, :subscription_id)
+                # #   code << "SUBSCRIPTION_ID.to_s.rjust(9, '0')+qindex.to_s.upcase.rjust(3, '0')"
+                # # elsif headers.contains?(:subscriber_id)
+                # #   code << "SUBSCRIBER_ID.to_s.rjust(6, '0')+number_by_subscriber[SUBSCRIBER_ID].to_s.upcase.rjust(3, '0')"
+                # # else
+                # code << "file_number.to_s.rjust(2, '0')[-2..-1]+number.to_s.rjust(6, '0')"
+                code << "number.to_s"
                 # end
                 code = params[:subscriber_prefix].to_s.inspect+"+"+code unless params[:subscriber_prefix].blank?
                 code
