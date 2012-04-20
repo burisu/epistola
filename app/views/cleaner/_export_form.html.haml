@@ -1,0 +1,13 @@
+=form_tag({}, "data-collect"=>"form.exportable") do
+  %fieldset
+    %legend Export
+    %table.formic
+      %tr
+        %td.label Préfixe N°Abonné
+        %td.input=text_field_tag("subscriber_prefix", params["subscriber_prefix"])
+      %tr
+        %td.label Nom du fichier à exporter
+        %td.input=text_field_tag("export_file", params["export_file"])
+      
+    .actions
+      =submit_tag("Exporter")

@@ -10,32 +10,65 @@ a:hover { color: #04B; text-decoration: underline;}
 h1 { font-size: 2em; }
 body { background: #F1F2F3 }
 p { margin:0 0 0.7em; }
-#page { background: #FFF; width: 70%; margin: 2em auto; box-shadow: 0 0 1em rgba(0,0,0,0.4)}
-#banner {  background-image: -moz-linear-gradient(bottom, #222 0%, #4D4D4D 75%, #444 100%); padding: 10px 20px; vertical-align: center;}
-#banner * { color: rgba(255,255,255,0.9); font-size: 3em;}
-#banner .title { font-weight: bold; text-shadow: 0 0 32px #027, 0 0 16px #15A, 0 0 8px #58F, 0 0 4px #DEF}
-#banner .slogan { font-size: 2em; font-style: italic; color: rgba(255,0,0,0.7); text-shadow: 0 0 15px #000; }
+#page { 
+  background: #FFF; 
+  width: 70%; 
+  margin: 2em auto; 
+  @include box-shadow(0 0 1em rgba(0,0,0,0.4));
+  #banner {
+    background: #555; 
+    padding: 10px 20px;
+    vertical-align: center;
+    * { 
+      color: rgba(255,255,255,0.9); 
+      font-size: 2em;
+    }
+    .title { 
+      font-weight: bold; 
+      text-shadow: 0 0 32px #027, 0 0 16px #15A, 0 0 8px #58F, 0 0 4px #DEF;
+    }
+    .slogan { 
+      font-style: italic; 
+      color: white; 
+      text-shadow: 0 0 32px #720, 0 0 16px #A51, 0 0 8px #F85, 0 0 4px #FED;
+    }
+  }
+  #main { 
+    background: #FFF; 
+    padding: 2em;
+    #files {
+      margin: 0 0;
+    }
+    #export { display: none; }
+  }
+}
 
-#main { background: #FFF; padding: 2em; }
-
-#files {padding: 1em 0}
-
-fieldset, .file { border: 1px solid #DDD; padding: 1ex; margin: 1em 0;}
+fieldset, .file { border: 1px solid #DDD; padding: 1ex; }
+.file { margin: 1em 0;}
 .spacer { height: 1px; background: #DDD; margin: 1ex 0;};
 .file .title, fieldset legend { color: #555 ; font-weight: bold; padding: 0 10px; font-variant: small-caps; font-size: 150%;}
 .file .title { color: #D42; padding: 0; }
 
-.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; @include box-shadow(0 0 20px rgba(64,128,255,0.2) inset); margin-right: -9px;}
-.actions { text-align: center; padding: 0.5em; margin: 0.5em 0 0 0; @include box-shadow(0 0 20px rgba(64,128,255,0.2) inset); }
+$bground: rgba(64,128,192,0.2);
+
+.remove-me { float: right; font-size: 80%; display: block; padding: 0.5em 1em; @include box-shadow(0 0 20px $bground inset); margin-right: -9px; border: 1px solid $bground;}
+.actions { border: 1px solid $bground; text-align: center; padding: 0.5em; margin: 0.5em 0 0 0; @include box-shadow(0 0 20px $bground inset); }
 .actions > * { margin: 0 1ex; }
 
-table.formic {width: 100%; border-collapse: collapse;}
-table.formic td.label, label { text-align: right; font-weight: normal; width: 30%; padding: 0 1ex;}
-table.formic td.input { 
-                        select, input {  width: 95% ; }
-                        input[size] {  width: auto ; }
+table.formic {
+  width: 100%; 
+  border-collapse: collapse;
+  td.input { 
+    select, input {  width: 95% ; }
+    input[size] {  width: auto ; }
+  }
+  td.example { 
+    color: #777; 
+    padding: 0 1ex; 
+    width: 30%;
+  }
 }
-table.formic td.example { color: #777; padding: 0 1ex; width: 30%;}
+table.formic td.label, label { text-align: right; font-weight: normal; width: 30%; padding: 0 1ex;}
 
 .success { color: #070; margin: 0;}
 .error, .errors li p { color: #900; margin: 0;}

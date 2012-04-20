@@ -1,17 +1,5 @@
-#import.actions=link_to("Importer un nouveau fichier", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top")
+#import.actions=link_to("Importer un nouveau fichier", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top", :id=>"import-button")
 
 #files
 
-=form_tag({}, "data-collect"=>"form.exportable", :id=>"export") do
-  %fieldset
-    %legend Export
-    %table.formic
-      %tr
-        %td.label Préfixe N°Abonné
-        %td.input=text_field_tag("subscriber_prefix", params["subscriber_prefix"])
-      %tr
-        %td.label Nom du fichier à exporter
-        %td.input=text_field_tag("export_file", params["export_file"])
-      
-    .actions
-      =submit_tag("Exporter")
+#export{"hidden-if-empty"=>"#files"}=render :partial=>"export_form"

@@ -68,3 +68,14 @@ $("form[data-collect]").live("submit", function (event) {
     });
     return true;
 });
+
+$.displayExport = function() {
+    var files = $('#files'), exporter = $('#export');
+    if (exporter.is(":hidden") && files.children(":visible").size() > 0) {
+	exporter.fadeIn('fast');
+    } else if (exporter.is(":visible") && files.children(":visible").size() <= 0) {
+	exporter.fadeOut('fast');
+    }
+}
+
+window.setInterval($.displayExport, 200);
