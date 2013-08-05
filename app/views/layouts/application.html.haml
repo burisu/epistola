@@ -5,7 +5,7 @@
     =stylesheet_link_tag("application", :media => "all")
     =javascript_include_tag(:application)
     =csrf_meta_tags
-  %body
+  %body{:data => {:ruby => RUBY_VERSION, :rails => Rails.version}}
     %a#github{:href => "http://github.com/burisu/epistola"}
       %img{:style => "position: absolute; top: 0; right: 0; border: 0;", :src => "https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png", :alt=>"Fork me on GitHub"}
     #page

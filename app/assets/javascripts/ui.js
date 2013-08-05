@@ -1,6 +1,6 @@
 
 // Update DOM with new system
-$("*[data-update]").live("ajax:success", function (event, data, status, xhr) {
+$(document).on("ajax:success", "*[data-update]", function (event, data, status, xhr) {
     var element = $(this);
     var position = $.trim(element.data("update-at")).toLowerCase();
     if (position === "top") {
@@ -19,14 +19,14 @@ $("*[data-update]").live("ajax:success", function (event, data, status, xhr) {
     return false;
 });
 
-$("a[data-remove]").live("click", function () {
+$(document).on("click", "a[data-remove]", function () {
     $($(this).data("remove")).fadeOut('fast', function() {
 	$(this).remove();
     });
     return false;
 });
 
-$("form[data-remote][data-disable]").live("ajax:before", function (event) {
+$(document).on("ajax:before", "form[data-remote][data-disable]", function (event) {
     var element = $(this), target, overlay = $("<div></div>"), offset;
     target = $('#' + element.data("disable"));
     offset = target.offset();
@@ -39,7 +39,7 @@ $("form[data-remote][data-disable]").live("ajax:before", function (event) {
 });
 
 
-$("form[data-remote][data-disable]").live("ajax:complete", function (event) {
+$(document).on("ajax:complete", "form[data-remote][data-disable]", function (event) {
     var element = $(this), target;
     target = $('#' + element.data("disable"));
     // target.attr("disabled", "false");
@@ -48,7 +48,7 @@ $("form[data-remote][data-disable]").live("ajax:complete", function (event) {
     });
 });
 
-$("form[data-collect]").live("submit", function (event) {
+$(document).on("submit", "form[data-collect]", function (event) {
     // Duplicates 
     var form = $(this), collector = $("<div></div>");
     form.children('.data-collector').remove();
