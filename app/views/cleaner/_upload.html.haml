@@ -1,13 +1,13 @@
 %tr.upload{:id=>upload[:key], :class=>"#{' invalid' if upload[:error]}"}
-  %td.label=upload[:label]
+  %td.label= upload[:label]
   %td.input{:class=>"#{' success' if upload[:uploaded]}"}
-    =hidden_field_tag("uploads[#{upload[:key]}][key]", upload[:key])
-    =hidden_field_tag("uploads[#{upload[:key]}][label]", upload[:label])
-    =hidden_field_tag("uploads[#{upload[:key]}][uploaded]", upload[:uploaded].to_s)
-    -if upload[:uploaded]
+    = hidden_field_tag("uploads[#{upload[:key]}][key]", upload[:key])
+    = hidden_field_tag("uploads[#{upload[:key]}][label]", upload[:label])
+    = hidden_field_tag("uploads[#{upload[:key]}][uploaded]", upload[:uploaded].to_s)
+    - if upload[:uploaded]
       %label Téléchargé avec succès
-    -else
-      =file_field_tag("uploads[#{upload[:key]}][data]")
-      -if upload[:error]
-        .error=upload[:error]
-    %td=link_to("Supprimer", "#", "data-remove"=>"##{upload[:key]}")
+    - else
+      = file_field_tag("uploads[#{upload[:key]}][data]")
+      - if upload[:error]
+        .error= upload[:error]
+    %td= link_to("Supprimer", "#", "data-remove"=>"##{upload[:key]}")

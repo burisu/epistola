@@ -259,7 +259,7 @@ class CleanerController < ApplicationController
       #
       file = new_file
     end
-    render :partial=>"cleaner/file", :object => file
+    render :partial => "cleaner/file", :object => file
   end
 
 

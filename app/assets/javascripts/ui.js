@@ -38,8 +38,7 @@ $(document).on("ajax:before", "form[data-remote][data-disable]", function (event
     overlay.fadeIn();
 });
 
-
-$(document).on("ajax:complete", "form[data-remote][data-disable]", function (event) {
+$(document).on("ajax:complete", "form[data-remote][data-disable]", function (event, request, status) {
     var element = $(this), target;
     target = $('#' + element.data("disable"));
     // target.attr("disabled", "false");

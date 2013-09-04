@@ -11,7 +11,9 @@ gem 'exception_notification', '~> 3.0'
 gem 'rails-i18n'
 gem 'haml'
 gem 'fastercsv'
-gem 'remotipart'
+gem 'remotipart', '~> 1.1.0'
+
+gem 'thin'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -19,6 +21,7 @@ group :assets do
   gem 'sass-rails',   '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
   gem 'compass-rails'
+  gem 'quiet_assets'
 
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   gem 'therubyracer', :platform => :ruby

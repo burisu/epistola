@@ -1,5 +1,7 @@
-#import.actions=link_to("Importer un nouveau fichier", {:action=>:add_file}, :remote=>true, "data-update"=>"#files", "data-update-at"=>"top", :id=>"import-button")
+#import.actions
+  = link_to("Importer un nouveau fichier", {action: :add_file}, :remote => true, "data-update" => "#files", "data-update-at" => "top", :id => "import-button")
 
 #files
 
-#export{"hidden-if-empty"=>"#files"}=render :partial=>"export_form"
+#export{"hidden-if-empty" => "#files"}
+  = render :partial => "export_form"
